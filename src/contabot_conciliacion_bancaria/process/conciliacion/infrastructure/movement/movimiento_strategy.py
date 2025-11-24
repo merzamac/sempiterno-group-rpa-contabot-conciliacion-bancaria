@@ -5,12 +5,19 @@ from typing import List, Dict, Any
 from openpyxl import Workbook
 from openpyxl.styles import PatternFill
 from .comparators import ReporteComparator, MontoComparator
+from contabot_conciliacion_bancaria.process.conciliacion.types import (
+    ReportToConciliar,
+    ToConciliar,
+)
+from contabot_conciliacion_bancaria.process.shared.domain.models import RowMovement
 
 
 # Strategy Pattern
 class MovimientoStrategy(ABC):
     @abstractmethod
-    def procesar(self, movimientos: tuple, reportes: tuple) -> Dict:
+    def procesar(
+        self, movimientos: tuple, data_to_conciliar: ReportToConciliar
+    ) -> Dict:
         pass
 
 
@@ -19,15 +26,29 @@ class IngresosStrategy(MovimientoStrategy): ...
 
 
 class EgresosStrategy(MovimientoStrategy):
-    def procesar(self, movement: tuple, reportes: tuple) -> Dict:
-        coincidencias = []
-        masivo = []
+    def procesar(self, movements: tuple, data_to_conciliar: ReportToConciliar) -> Dict:
+        coincidencias: list = []
+        masivo: list[RowMovement] = []
+        for glosa_data in data_to_conciliar.glosas:
+            # for index, row in enumerate(movement, 2):
+            if glosa_data.glosa == "SERVICIO CLARO":
+                print(glosa_data.glosa)  # and fecha_emision == row.fecha_emision:
+            rows_report, marcar_glosa_con_fecha = (
+                ReporteComparator.encontrar_coincidencias(
+                    glosa_data, data_to_conciliar.report
+                )
+            )
 
-        for index, row in enumerate(movement, 2):
-            rows_report = ReporteComparator.encontrar_coincidencias(row.glosa, reportes)
-            if rows_report and MontoComparator.coinciden(rows_report, row):
-                coincidencias.append(index)
-                masivo.extend(rows_report)
+            if rows_report and MontoComparator.coinciden(
+                rows_report, movements, coincidencias, masivo
+            ):
+                values = coincidencias[-1]
+
+        # for index, row in enumerate(movement, 2):
+        #     rows_report = ReporteComparator.encontrar_coincidencias(data_to_conciliar)
+        #     if rows_report and MontoComparator.coinciden(rows_report, row):
+        #         coincidencias.append(index)
+        #         masivo.extend(rows_report)
 
         return {
             "coincidencias": coincidencias,

@@ -1,12 +1,23 @@
 from datetime import datetime, date
+
+from contabot_conciliacion_bancaria.process.constants import (
+    PAYMENT_GATEWAYS_POSIBILITES,
+)
 from contabot_conciliacion_bancaria.process.constants import MONEDAS, BANKS
 from contabot_conciliacion_bancaria.process.shared.domain.models import RowMasivo
+from contabot_conciliacion_bancaria.process.conciliacion.app.cuenta_contable import (
+    CuentaContable,
+    Moneda,
+    Bank,
+    PaymentGateway,
+)
+from contabot_conciliacion_bancaria.utils.filter import search
 
 
 class Masivo:
     def __init__(self, masivo: tuple) -> None:
-        self.usd = tuple(r for r in masivo if r.tipo_moneda == MONEDAS["USD"])
-        self.pen = tuple(r for r in masivo if r.tipo_moneda == MONEDAS["PEN"])
+        self.usd = tuple(r for r in masivo if r.tipo_moneda == Moneda.USD.value)
+        self.pen = tuple(r for r in masivo if r.tipo_moneda == Moneda.PEN.value)
 
     def generic_data(self, moneda: str) -> dict:
         today = date.today()
@@ -31,19 +42,53 @@ class Masivo:
             generic_data=self.generic_data(moneda),
         )
 
+    def ingresos_pen_by_bank(self) -> dict:
+        # values = tuple(r for r in self.pen if r.tipo_transaccion == "")
+        # con la linea comentada puedes ver cueantas movimientos llegan con tipo de transaccion vacio
+        # citiban no se considera para los ingresos
+        return self._by_bank_and_payment(
+            reports=self.pen,
+            generic_data=self.generic_data(Moneda.PEN.type()),
+        )
+
     def dolares_by_bank(self) -> dict:
         moneda = "E"
         return self._by_bank(self.usd, generic_data=self.generic_data(moneda))
 
     def _by_bank(self, reports: tuple, generic_data: dict) -> dict:
         by_bank: dict = {}
-        for bank in BANKS:
-            bank_reports = [report for report in reports if report.banco == bank]
-            by_bank[bank] = tuple(
+        for bank in Bank:
+            bank_reports = [report for report in reports if report.banco == bank.value]
+            by_bank[bank.value] = tuple(
                 self._parse_masivo(generic_data, index, report)
                 for index, report in enumerate(bank_reports, 1)
             )
         return by_bank
+
+    def _by_bank_and_payment(self, reports: tuple, generic_data: dict) -> dict:
+        by_bank_and_payment: dict = {}
+        posibilities = (
+            tuple(member.value for member in PaymentGateway.__members__.values())
+            + PAYMENT_GATEWAYS_POSIBILITES
+        )
+        for bank in Bank:
+            bank_reports = [
+                report
+                for report in reports
+                if report.banco == bank.value
+                and report.tipo_transaccion in posibilities
+            ]
+            for payment in PaymentGateway:
+                bank_reports_by_payment = [
+                    report
+                    for report in bank_reports
+                    if report.tipo_transaccion.endswith(payment.value)
+                ]
+                by_bank_and_payment[f"{payment.value} {bank.value}"] = tuple(
+                    self._parse_masivo(generic_data, index, report)
+                    for index, report in enumerate(bank_reports_by_payment, 1)
+                )
+        return by_bank_and_payment
 
     # {
     #     bank: tuple(
@@ -67,22 +112,25 @@ class Masivo:
             "BBVA": "104141",
             "BCP": "104121",
         }
+
         return RowMasivo(
             anio=data["anio"],
             mes=data["mes"],
             num_compbte=index,
             items=data["item"],
             cen_costo=data["cen_costo"],
-            cta_contable=cta_contable[report.banco],
+            cta_contable=str(
+                CuentaContable().cuenta(report.banco, Moneda[report.tipo_moneda])
+            ),
             cod_dcto=data["cod_dcto"],
-            num_dcto=report.numero_doc,
+            num_dcto=report.referencia,
             cod_cliente=data["cod_cliente"],
-            fch_dcto=report.fecha_emision,
-            fch_vto=report.fecha_emision,
+            fch_dcto=report.fecha_pagos,
+            fch_vto=report.fecha_pagos,
             glosa=report.glosa,
             mon=data["mon"],
             tip_mvto=data["tip_mvto"],
-            valor_mn=report.monto,
+            valor_mn=abs(report.monto),
             valor_me=data["valor_me"],
         )
 

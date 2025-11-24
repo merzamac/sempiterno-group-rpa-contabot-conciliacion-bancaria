@@ -162,3 +162,37 @@ class HeaderMasivo(Header):
             cls.VALOR_MN.value,
             cls.VALOR_ME.value,
         )
+
+
+class HeaderBCPING(Header):
+    FECHA = "Fecha"
+    REFERENCIA = "Operación - Número"
+    DESCRIPCION = "Descripción operación"
+    METODO = "XXX"
+    MONTO = "Monto"
+    # SALDO = "Saldo"
+    # SUCURSAL = "Sucursal - agencia"
+
+
+class HeaderSKBING(Header):
+    FECHA = "Fecha"
+    REFERENCIA = "Referencia"
+    DESCRIPCION = "Movimiento"
+    METODO = "XXX"
+    MONTO = "Importe"
+
+
+class HeaderIBKING(Header):
+    FECHA = "Fecha de operación"
+    REFERENCIA = "Nro. de operación"
+    DESCRIPCION = "Movimiento"
+    METODO = "XXX"
+    MONTO = "Abono"
+
+
+class HeaderBBVAING(Header):
+    FECHA = "F. Operación"
+    REFERENCIA = "Nº. Doc."
+    DESCRIPCION = "Concepto"
+    METODO = "XXX"
+    MONTO = "Importe"

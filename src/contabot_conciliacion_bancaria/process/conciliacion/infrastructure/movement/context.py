@@ -1,4 +1,10 @@
-from multiprocessing.reduction import duplicate
+from contabot_conciliacion_bancaria.process.conciliacion.app.cuenta_contable import (
+    Bank,
+    Moneda,
+    PaymentGateway,
+)
+import copy
+from contabot_conciliacion_bancaria.process.constants import MAX_ROWS
 from .movimiento_strategy import EgresosStrategy
 from .excel_builder import ReportExcelBuilder, MasivoExcelBuilder
 from pathlib import Path
@@ -6,15 +12,16 @@ from dataclasses import replace
 from contabot_conciliacion_bancaria.process.shared.domain.models import Child
 from contabot_conciliacion_bancaria.types import SuffixTypes
 from datetime import date, timedelta
-
+from contabot_conciliacion_bancaria.process.conciliacion.types import ReportToConciliar
 import calendar
+from contabot_conciliacion_bancaria.utils.slice import split_operation
 
 
 class GetReport:
     @classmethod
     def execute(
         cls,
-        reports: tuple,
+        data_to_conciliar: ReportToConciliar,
         movements: dict,
         excel_builder: ReportExcelBuilder,
         masivo: list,
@@ -23,7 +30,7 @@ class GetReport:
         strategy = EgresosStrategy()
         for sheet_name, movement in movements.items():
             # Procesar movimientos
-            resultado = strategy.procesar(movement, reportes=reports)
+            resultado = strategy.procesar(movement, data_to_conciliar)
             # Agregar sheet al Excel
             resultado["movimientos"] = movement
             masivo.extend(resultado["masivo"])
@@ -43,7 +50,35 @@ class MasivoByBank:
             masivo_excel.make_report(sheet_name, data)
             wb = masivo_excel.build()
             children.append(Child(Path(save_dir / file), wb, SuffixTypes.XLSX))
+
             # wb.save(file)
+
+
+class MasivoIngresosByBank:
+    @staticmethod
+    def execute(masivo_data: dict, save_dir: Path, children: list):
+        # save_dir.mkdir(parents=True, exist_ok=True)
+
+        for sheet_name, data in masivo_data.items():
+            """Dividir los movimientos en grupos, grupos por bancos. hay 4"""
+            if not data:
+                continue
+
+            for i, chuck_data in enumerate(split_operation(data, MAX_ROWS), 1):
+                """de cada banco se genera un masivo, pero tiene un limites de registros y debe ser de menos de 1000"""
+                bank = Bank[sheet_name.split(" ")[1]].value
+                masivo_excel = MasivoExcelBuilder()
+                file = f"INGRESO {sheet_name} {i if len(chuck_data) > 990 else ''}"
+                total = round(sum([row.valor_mn for row in chuck_data]), 2)
+                row_copy = copy.deepcopy(chuck_data[-1])
+
+                row_copy.valor_mn = total
+                row_copy.num_compbte = str(int(row_copy.num_compbte) + 1)
+                masivo_excel.make_report(Moneda.PEN.value, (chuck_data + [row_copy]))
+                wb = masivo_excel.build()
+                children.append(
+                    Child(Path(save_dir / bank / file), wb, SuffixTypes.XLSX)
+                )
 
 
 class DuplicateMasivo:

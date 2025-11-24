@@ -68,7 +68,7 @@ class GetDataFrame:
 class ExtractInsideDirectory:
 
     @staticmethod
-    def execute(directory_path: Path, number_of_files: int) -> dict[str, Path]:
+    def execute(directory_path: Path, number_of_files: int) -> tuple[Path, ...]:
         if not directory_path.exists():
             raise ValueError(f"does not exist: {directory_path}")
         if not directory_path.is_dir():
@@ -80,15 +80,13 @@ class ExtractInsideDirectory:
         if not excel_files:
             raise ValueError(f"no Excel files found in directory: {directory_path}")
 
-        if not (1 < len(excel_files) <= 2):
+        if not (1 < len(excel_files) <= number_of_files):
             raise ValueError(f"expected 2 Excel files, but found {len(excel_files)} ")
 
-        # contenidos: ConciliacionResult
-        # for file in excel_files:
-        #     if file.stem.lower().startswith("reporte"):
-        #         contenidos["reportes"] = file
-        #     else:
-        #         contenidos["movimientos"] = file
-        contenidos: dict[str, Path] = {file.stem: file for file in excel_files}
+        files = [file for file in excel_files]
 
-        return contenidos
+        if files and files[0].stem.lower().startswith("movimientos"):
+
+            files = files[::-1]
+        # el archivo de reportes es el primero siempre
+        return tuple(files)

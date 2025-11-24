@@ -3,6 +3,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Sequence
 
+MASIVOS_EGRESOS_DIR = Path("MASIVO EGRESOS")
+MASIVOS_INGRESOS_DIR = Path("MASIVOS INGRESOS")
+EGR_PEN_DIR = MASIVOS_EGRESOS_DIR / "SOLES"
+EGR_USD_DIR = MASIVOS_EGRESOS_DIR / "DOLARES"
+# ING_PEN_DIR = MASIVOS_INGRESOS_DIR / "SOLES"
+# ING_USD_DIR = MASIVOS_INGRESOS_DIR / "DOLARES"
+
 
 @dataclass
 class Paths:

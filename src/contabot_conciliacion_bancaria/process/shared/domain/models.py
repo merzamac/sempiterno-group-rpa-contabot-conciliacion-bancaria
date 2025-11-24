@@ -49,14 +49,16 @@ class Child:
 class RowMovement(Row):
     """Fila para transacciones financieras movimientos"""
 
-    fecha_emision: date
+    fecha_pagos: date
     referencia: str
     descripcion: str
     # movimiento: str
+    tipo_transaccion: str
     monto: float
     estado: str
     tipo_moneda: str
     glosa: str
+    pagos: str
 
     banco: str
 
@@ -72,13 +74,13 @@ class RowMovement(Row):
         """Permite conversion a tuple: tuple(row)"""
         return iter(
             [
-                self.fecha_emision,
+                "",
+                self.fecha_pagos,
                 self.referencia,
                 self.descripcion,
                 self.monto,
-                self.estado,
-                self.tipo_moneda,
-                self.banco,
+                self.estado or "",
+                "",
                 self.glosa,
             ]
         )

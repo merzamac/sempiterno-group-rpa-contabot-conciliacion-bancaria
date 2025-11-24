@@ -1,4 +1,4 @@
-from typing import Generator, Optional
+from typing import Optional
 from pathlib import Path
 from contabot_conciliacion_bancaria.path_reader.domain.models import (
     ProcessableDirectory,
@@ -16,17 +16,15 @@ from contabot_conciliacion_bancaria.processor.factory import (
 
 
 def main() -> None:
-
-    processable_input_files: Generator[ProcessableDirectory] = (
-        GetInputFilesToProcess.execute(
-            input_dir=paths.INPUT_DIR,
-            output_dir=paths.OUTPUT_DIR,
-            current_date=datetime.now(),
-        )
+    processable_input_files = GetInputFilesToProcess.execute(
+        input_dir=paths.INPUT_DIR,
+        output_dir=paths.OUTPUT_DIR,
+        current_date=datetime.now(),
     )
 
     if not processable_input_files:
         logger.warning("No files to process.")
+
         return
     for processable_file in processable_input_files:
         with logger.contextualize(
@@ -42,7 +40,7 @@ def main() -> None:
                 # processable_file.element_path.stem
             )
 
-            # By default the bodies of untyped functions are not checked, consider using --check-untyped-defsMypy(annotation-unchecked)
+            # By default, the bodies of untyped functions are not checked, consider using --check-untyped-defsMypy(annotation-unchecked)
 
             save_directory.mkdir(parents=True, exist_ok=True)
             # se crea el proceso...
@@ -50,7 +48,7 @@ def main() -> None:
             processor: Optional[ProcessProcessor] = (
                 ProcessProcessorFactory.create_processor(processable_file.process_type)
             )
-            # By default the bodies of untyped functions are not checked, consider using --check-untyped-defsMypy(annotation-unchecked)
+            # By default, the bodies of untyped functions are not checked, consider using --check-untyped-defsMypy(annotation-unchecked)
 
             if not processor:
                 logger.error("Invalid process")
