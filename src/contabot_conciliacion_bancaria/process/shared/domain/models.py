@@ -23,15 +23,25 @@ class Row(ABC):
         pass
 
 
+@dataclass
+class FileToUpload:
+    file_Path: Path
+    type_transaction: str
+    date: date
+
+
 class Child:
 
-    def __init__(self, name: Path, wb: Workbook, suffix: SuffixTypes) -> None:
+    def __init__(
+        self, name: Path, wb: Workbook, suffix: SuffixTypes, to_upload: bool
+    ) -> None:
         self.name = name
         self.wb = wb
         self.suffix: SuffixTypes = suffix
         self.file_name: str = f"{self.name}{suffix.value}"
+        self.to_upload: bool = to_upload
 
-    def save(self, save_dir: Path) -> Path:
+    def save(self, save_dir: Path) -> FileToUpload | None:
         # save_dir.mkdir(parents=True, exist_ok=True)
         file_path: Path = save_dir / self.file_name
         file_path.parent.mkdir(parents=True, exist_ok=True)
@@ -41,8 +51,11 @@ class Child:
 
         if self.suffix.value == SuffixTypes.CSV.value:
             self.wb.save(f"{file_path}")
-
-        return file_path
+        if self.to_upload:
+            return FileToUpload(
+                file_Path=file_path, type_transaction="", date=date.today()
+            )
+        return None
 
 
 @dataclass

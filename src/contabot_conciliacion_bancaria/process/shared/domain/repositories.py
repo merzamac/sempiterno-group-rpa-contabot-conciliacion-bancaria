@@ -17,7 +17,11 @@ class Container(ABC):
     def save(self, save_dir: Path):
         save_dir.mkdir(parents=True, exist_ok=True)
 
-        return tuple(child.save(save_dir=save_dir) for child in self.children)
+        return tuple(
+            result
+            for child in self.children
+            if (result := child.save(save_dir=save_dir)) is not None
+        )
 
     @abstractmethod
     def conciliar(self) -> None: ...

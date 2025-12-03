@@ -15,6 +15,11 @@ from datetime import date, timedelta
 from contabot_conciliacion_bancaria.process.conciliacion.types import ReportToConciliar
 import calendar
 from contabot_conciliacion_bancaria.utils.slice import split_operation
+from contabot_conciliacion_bancaria.paths import (
+    EGR_PEN_DIR,
+    EGR_USD_DIR,
+    MASIVOS_INGRESOS_DIR,
+)
 
 
 class GetReport:
@@ -49,14 +54,21 @@ class MasivoByBank:
             file = f"EGR {sheet_name}"
             masivo_excel.make_report(sheet_name, data)
             wb = masivo_excel.build()
-            children.append(Child(Path(save_dir / file), wb, SuffixTypes.XLSX))
+            children.append(
+                Child(
+                    name=Path(save_dir / file),
+                    wb=wb,
+                    suffix=SuffixTypes.XLSX,
+                    to_upload=False,
+                )
+            )
 
             # wb.save(file)
 
 
 class MasivoIngresosByBank:
     @staticmethod
-    def execute(masivo_data: dict, save_dir: Path, children: list):
+    def execute(masivo_data: dict, children: list):
         # save_dir.mkdir(parents=True, exist_ok=True)
 
         for sheet_name, data in masivo_data.items():
@@ -77,7 +89,12 @@ class MasivoIngresosByBank:
                 masivo_excel.make_report(Moneda.PEN.value, (chuck_data + [row_copy]))
                 wb = masivo_excel.build()
                 children.append(
-                    Child(Path(save_dir / bank / file), wb, SuffixTypes.XLSX)
+                    Child(
+                        name=Path(MASIVOS_INGRESOS_DIR / bank / file),
+                        wb=wb,
+                        suffix=SuffixTypes.XLSX,
+                        to_upload=True,
+                    )
                 )
 
 
@@ -119,6 +136,11 @@ class MasivoByDate:
                 masivo_excel.make_report(sheet_name, data_by_date)
                 wb = masivo_excel.build()
                 children.append(
-                    Child(Path(save_dir / sheet_name / file), wb, SuffixTypes.XLSX)
+                    Child(
+                        name=Path(save_dir / sheet_name / file),
+                        wb=wb,
+                        suffix=SuffixTypes.XLSX,
+                        to_upload=True,
+                    )
                 )
                 first_date += timedelta(days=1)

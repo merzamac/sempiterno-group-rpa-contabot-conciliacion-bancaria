@@ -22,3 +22,7 @@ distribution = true
 dev = [
     "pytest>=8.4.2",
 ]
+[tool.pyrefly]
+search_path = [
+    "src/contabot_conciliacion_bancaria",
+]

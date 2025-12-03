@@ -70,9 +70,10 @@ class ConciliacionContainer(Container):
         self.masivo_ingresos = Masivo(tuple(ingresos_soles))
         self.pack_to_save: list[Child] = [
             Child(
-                Path("Movimientos"),
-                self.excel_builder.build(),
-                SuffixTypes.XLSX,
+                name=Path("Movimientos"),
+                wb=self.excel_builder.build(),
+                suffix=SuffixTypes.XLSX,
+                to_upload=False,
             ),
         ]
 
@@ -84,7 +85,7 @@ class ConciliacionContainer(Container):
         by_pen = self.masivo_egresos.soles_by_bank()
         by_usd = self.masivo_egresos.dolares_by_bank()
         ingresos_by_bank = self.masivo_ingresos.ingresos_pen_by_bank()
-        MasivoIngresosByBank.execute(ingresos_by_bank, MASIVOS_INGRESOS_DIR, self.pack_to_save)
+        MasivoIngresosByBank.execute(ingresos_by_bank, self.pack_to_save)
         for name_sheet, report in by_pen.items():
             by_pen[name_sheet] = DuplicateMasivo.execute(list(report))
         for name_sheet, report in by_usd.items():
@@ -94,6 +95,6 @@ class ConciliacionContainer(Container):
         MasivoByBank.execute(by_pen, EGR_PEN_DIR, self.pack_to_save)
         MasivoByBank.execute(by_usd, EGR_USD_DIR, self.pack_to_save)
         MasivoByDate.execute(by_pen, EGR_PEN_DIR, self.pack_to_save, period_date)
-        MasivoByDate.execute(by_pen, EGR_USD_DIR, self.pack_to_save, period_date)
+        MasivoByDate.execute(by_usd, EGR_USD_DIR, self.pack_to_save, period_date)
 
         self.children = tuple(self.pack_to_save)

@@ -23,6 +23,7 @@ class ConciliacionProcessor(AppBasedProcessor):
         container = self.get_container(processable_directory.element_path)
         container.conciliar()
         container.masivo(period_date=processable_directory.get_period_date)
-        container.save(save_directory)
+        files_to_upload = container.save(save_directory)
+        assert files_to_upload
 
     def process_with_app(self): ...
