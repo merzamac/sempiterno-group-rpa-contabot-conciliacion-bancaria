@@ -46,7 +46,7 @@ class GetReport:
 class MasivoByBank:
     @staticmethod
     def execute(masivo_data: dict, save_dir: Path, children: list):
-        save_dir.mkdir(parents=True, exist_ok=True)
+        # save_dir.mkdir(parents=True, exist_ok=True)
 
         for sheet_name, data in masivo_data.items():
             if not data:
@@ -90,6 +90,9 @@ class MasivoIngresosByBank:
 
                 row_copy.valor_mn = total
                 row_copy.num_compbte = str(int(row_copy.num_compbte) + 1)
+                row_copy.cta_contable = (
+                    "1031103" if "EFECTIVO" in sheet_name else "1031102"
+                )
                 masivo_excel.make_report(Moneda.PEN.value, (chuck_data + [row_copy]))
                 wb = masivo_excel.build()
                 children.append(
@@ -126,7 +129,7 @@ class MasivoByDate:
     @staticmethod
     def execute(masivo_data: dict, save_dir: Path, children: list, period_date: date):
 
-        save_dir.mkdir(parents=True, exist_ok=True)
+        # save_dir.mkdir(parents=True, exist_ok=True)
         _, last_day = calendar.monthrange(period_date.year, period_date.month)
 
         last_date = date(period_date.year, period_date.month, last_day)
