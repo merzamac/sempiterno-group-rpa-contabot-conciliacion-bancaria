@@ -1,3 +1,4 @@
+from contabot_conciliacion_bancaria.types import TransactionType
 from contabot_conciliacion_bancaria.process.conciliacion.app.cuenta_contable import (
     Bank,
     Moneda,
@@ -60,6 +61,8 @@ class MasivoByBank:
                     wb=wb,
                     suffix=SuffixTypes.XLSX,
                     to_upload=False,
+                    transaction_type="35",
+                    _date=date.min,
                 )
             )
 
@@ -68,7 +71,7 @@ class MasivoByBank:
 
 class MasivoIngresosByBank:
     @staticmethod
-    def execute(masivo_data: dict, children: list):
+    def execute(masivo_data: dict, children: list, period_date: date):
         # save_dir.mkdir(parents=True, exist_ok=True)
 
         for sheet_name, data in masivo_data.items():
@@ -80,7 +83,8 @@ class MasivoIngresosByBank:
                 """de cada banco se genera un masivo, pero tiene un limites de registros y debe ser de menos de 1000"""
                 bank = Bank[sheet_name.split(" ")[1]].value
                 masivo_excel = MasivoExcelBuilder()
-                file = f"INGRESO {sheet_name} {i if len(chuck_data) > 990 else ''}"
+                transaction_type = f"ING PEN {bank}"
+                file = f"ING {sheet_name} {i if len(chuck_data) > 990 else ''}"
                 total = round(sum([row.valor_mn for row in chuck_data]), 2)
                 row_copy = copy.deepcopy(chuck_data[-1])
 
@@ -94,6 +98,10 @@ class MasivoIngresosByBank:
                         wb=wb,
                         suffix=SuffixTypes.XLSX,
                         to_upload=True,
+                        transaction_type=TransactionType[
+                            transaction_type.replace(" ", "_")
+                        ].value,
+                        _date=period_date,
                     )
                 )
 
@@ -135,12 +143,18 @@ class MasivoByDate:
                 file = f"{first_date.strftime('%d.%m')}"
                 masivo_excel.make_report(sheet_name, data_by_date)
                 wb = masivo_excel.build()
+                currency = "PEN" if "SOLES" in str(save_dir) else "USD"
+                transaction_type = f"EGR {currency} {sheet_name}"
                 children.append(
                     Child(
                         name=Path(save_dir / sheet_name / file),
                         wb=wb,
                         suffix=SuffixTypes.XLSX,
                         to_upload=True,
+                        transaction_type=TransactionType[
+                            transaction_type.replace(" ", "_")
+                        ].value,
+                        _date=first_date,
                     )
                 )
                 first_date += timedelta(days=1)

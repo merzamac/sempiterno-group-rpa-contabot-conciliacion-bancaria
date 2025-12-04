@@ -23,7 +23,7 @@ class Paths:
     INPUT_DIR: Path
     OUTPUT_DIR: Path
     TEMP_DIR: Path
-    SIG_PATH: Path
+    APP_PATH: Path
 
     @classmethod
     def from_config(cls, bot_path: str, cp: ConfigParser) -> "Paths":
@@ -50,7 +50,7 @@ class Paths:
             cp.get("PATHS", "OUTPUT_PATH", fallback=dot_data / "output")
         )
         temp_dir: Path = Path(root / ".temp")
-        sig_path: Path = Path(cp["PATHS"]["APP_PATH"])
+        app_path: Path = Path(cp["PATHS"]["APP_PATH"])
 
         for path in (logs_dir, dot_data):
             path.mkdir(parents=True, exist_ok=True)
@@ -64,5 +64,5 @@ class Paths:
             INPUT_DIR=input_dir,
             OUTPUT_DIR=output_dir,
             TEMP_DIR=temp_dir,
-            SIG_PATH=sig_path,
+            APP_PATH=app_path,
         )

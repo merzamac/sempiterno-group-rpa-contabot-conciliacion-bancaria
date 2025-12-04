@@ -15,9 +15,7 @@ from contabot_conciliacion_bancaria.process.shared.domain.models import RowMovem
 # Strategy Pattern
 class MovimientoStrategy(ABC):
     @abstractmethod
-    def procesar(
-        self, movimientos: tuple, data_to_conciliar: ReportToConciliar
-    ) -> Dict:
+    def procesar(self, movements: tuple, data_to_conciliar: ReportToConciliar) -> Dict:
         pass
 
 
@@ -31,8 +29,8 @@ class EgresosStrategy(MovimientoStrategy):
         masivo: list[RowMovement] = []
         for glosa_data in data_to_conciliar.glosas:
             # for index, row in enumerate(movement, 2):
-            if glosa_data.glosa == "SERVICIO CLARO":
-                print(glosa_data.glosa)  # and fecha_emision == row.fecha_emision:
+            # if glosa_data.glosa == "SERVICIO CLARO":
+            #     print(glosa_data.glosa)  # and fecha_emision == row.fecha_emision:
             rows_report, marcar_glosa_con_fecha = (
                 ReporteComparator.encontrar_coincidencias(
                     glosa_data, data_to_conciliar.report

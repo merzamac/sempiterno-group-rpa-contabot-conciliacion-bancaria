@@ -43,10 +43,7 @@ class ReadOutputDir:
     @staticmethod
     def execute(output_dir: Path) -> tuple[ProcessableDirectory, ...]:
         directories_output: tuple[Path, ...] = (
-            *ReadDir.execute(output_dir, f"*/{ProcessTypes.COMPRAS.value}/*"),
-            *ReadDir.execute(output_dir, f"*/{ProcessTypes.VENTAS.value}/*"),
             *ReadDir.execute(output_dir, f"*/{ProcessTypes.CONCILIACION.value}/*"),
-            *ReadDir.execute(output_dir, f"*/{ProcessTypes.PLANILLAS.value}/*"),
         )
         return tuple(
             processable_directory

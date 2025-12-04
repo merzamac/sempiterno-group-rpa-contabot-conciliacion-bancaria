@@ -21,8 +21,5 @@ class ProcessProcessorFactory:
     ) -> Optional[ProcessProcessor]:
         processors: Dict[str, ProcessProcessor] = {
             ProcessTypes.CONCILIACION.value: ConciliacionProcessor(),
-            # ProcessTypes.VENTAS.value: VentasProcessor(),
-            # ProcessTypes.COMPRAS.value: ComprasProcessor(),
-            # ProcessTypes.PLANILLAS.value: PlanillasProcessor(),
         }
         return processors.get(process_type.upper())

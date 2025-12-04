@@ -5,7 +5,7 @@ description = "Default template for PDM package"
 authors = [
     {name = "merzamac", email = "100945727+merzamac@users.noreply.github.com"},
 ]
-dependencies = ["loguru>=0.7.3", "dateparser>=1.2.2", "fastexcel>=0.16.0", "polars>=1.35.1", "openpyxl>=3.1.5", "types-openpyxl>=3.1.5.20250919"]
+dependencies = ["loguru>=0.7.3", "dateparser>=1.2.2", "fastexcel>=0.16.0", "polars>=1.35.1", "openpyxl>=3.1.5", "types-openpyxl>=3.1.5.20250919", "aconsys @ git+https://github.com/merzamac/pyaconsys.git"]
 requires-python = ">=3.13"
 readme = "README.md"
 license = {text = "\"\""}

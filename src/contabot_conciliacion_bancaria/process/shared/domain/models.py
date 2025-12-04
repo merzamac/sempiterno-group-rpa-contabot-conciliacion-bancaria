@@ -25,7 +25,7 @@ class Row(ABC):
 
 @dataclass
 class FileToUpload:
-    file_Path: Path
+    file_path: Path
     type_transaction: str
     date: date
 
@@ -33,13 +33,21 @@ class FileToUpload:
 class Child:
 
     def __init__(
-        self, name: Path, wb: Workbook, suffix: SuffixTypes, to_upload: bool
+        self,
+        name: Path,
+        wb: Workbook,
+        suffix: SuffixTypes,
+        to_upload: bool,
+        transaction_type: str,
+        _date: date,
     ) -> None:
         self.name = name
         self.wb = wb
         self.suffix: SuffixTypes = suffix
         self.file_name: str = f"{self.name}{suffix.value}"
         self.to_upload: bool = to_upload
+        self.transaction_type: str = transaction_type
+        self._date: date = _date
 
     def save(self, save_dir: Path) -> FileToUpload | None:
         # save_dir.mkdir(parents=True, exist_ok=True)
@@ -53,7 +61,9 @@ class Child:
             self.wb.save(f"{file_path}")
         if self.to_upload:
             return FileToUpload(
-                file_Path=file_path, type_transaction="", date=date.today()
+                file_path=file_path,
+                type_transaction=self.transaction_type,
+                date=self._date,
             )
         return None
 

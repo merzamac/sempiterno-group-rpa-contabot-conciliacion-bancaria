@@ -74,18 +74,16 @@ class ConciliacionContainer(Container):
                 wb=self.excel_builder.build(),
                 suffix=SuffixTypes.XLSX,
                 to_upload=False,
+                transaction_type="00",
+                _date=date.min,
             ),
         ]
 
     def masivo(self, period_date: date) -> None:
-        # masivo_egresos_dir = Path("MASIVO EGRESOS")
-        # masivo_ingresos_dir = Path("MASIVO EGRESOS")
-        # pen_dir = masivo_egresos_dir / "SOLES"
-        # usd_dir = masivo_egresos_dir / "DOLARES"
         by_pen = self.masivo_egresos.soles_by_bank()
         by_usd = self.masivo_egresos.dolares_by_bank()
         ingresos_by_bank = self.masivo_ingresos.ingresos_pen_by_bank()
-        MasivoIngresosByBank.execute(ingresos_by_bank, self.pack_to_save)
+        MasivoIngresosByBank.execute(ingresos_by_bank, self.pack_to_save, period_date)
         for name_sheet, report in by_pen.items():
             by_pen[name_sheet] = DuplicateMasivo.execute(list(report))
         for name_sheet, report in by_usd.items():
