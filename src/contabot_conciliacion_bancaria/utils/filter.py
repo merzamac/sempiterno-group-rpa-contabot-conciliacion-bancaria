@@ -1,9 +1,8 @@
 from contabot_conciliacion_bancaria.process.constants import BANKS
 from contabot_conciliacion_bancaria.process.conciliacion.types import ToConciliar
 import difflib
-from contabot_conciliacion_bancaria.process.conciliacion.app.cuenta_contable import (
-    PaymentGateway,
-)
+
+from contabot_conciliacion_bancaria.process.conciliacion.app.comisiones import Comision
 
 
 def filter_with_combinations(reports: tuple, resultados: list) -> None:
@@ -52,3 +51,15 @@ def search(words: str, posibilities: tuple, cutoff: float = 0.6) -> str:
         if concidences:
             return str(concidences[0])
     return ""
+
+
+def found_amount(amount_movement: float, amount_report: float) -> bool:
+    return (
+        abs(amount_movement) == abs(amount_report)
+        or abs(amount_movement)
+        == abs(Comision.con_25(amount_report))  # comision para sbk
+        or abs(amount_movement)
+        == abs(Comision.con_20(amount_report))  # comision para ibk
+        or abs(amount_movement) == abs(Comision.con_5(amount_report))
+        or abs(amount_movement) == abs(Comision.con_1_71(amount_report))
+    )

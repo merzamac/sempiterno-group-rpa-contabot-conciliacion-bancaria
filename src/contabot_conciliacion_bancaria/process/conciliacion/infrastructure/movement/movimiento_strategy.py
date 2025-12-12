@@ -1,10 +1,17 @@
 # movimientos/__init__.py
+from contabot_conciliacion_bancaria.process.conciliacion.infrastructure.movement.comparators import (
+    MontoComparatorReports,
+)
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import List, Dict, Any
 from openpyxl import Workbook
 from openpyxl.styles import PatternFill
-from .comparators import ReporteComparator, MontoComparator
+from .comparators import (
+    ReporteComparator,
+    MontoComparatorReports,
+    MontoComparatorMovements,
+)
 from contabot_conciliacion_bancaria.process.conciliacion.types import (
     ReportToConciliar,
     ToConciliar,
@@ -29,24 +36,22 @@ class EgresosStrategy(MovimientoStrategy):
         masivo: list[RowMovement] = []
         for glosa_data in data_to_conciliar.glosas:
             # for index, row in enumerate(movement, 2):
-            # if glosa_data.glosa == "SERVICIO CLARO":
-            #     print(glosa_data.glosa)  # and fecha_emision == row.fecha_emision:
+            if glosa_data.glosa == "PROV EXT SOFTPLAN":
+                print(glosa_data.glosa)  # and fecha_emision == row.fecha_emision:
             rows_report, marcar_glosa_con_fecha = (
                 ReporteComparator.encontrar_coincidencias(
                     glosa_data, data_to_conciliar.report
                 )
             )
+            # devuelve las filas de reportes que tienen la misma glosa y fecha
 
-            if rows_report and MontoComparator.coinciden(
+            if rows_report and not MontoComparatorReports.coinciden(
                 rows_report, movements, coincidencias, masivo
             ):
-                values = coincidencias[-1]
-
-        # for index, row in enumerate(movement, 2):
-        #     rows_report = ReporteComparator.encontrar_coincidencias(data_to_conciliar)
-        #     if rows_report and MontoComparator.coinciden(rows_report, row):
-        #         coincidencias.append(index)
-        #         masivo.extend(rows_report)
+                MontoComparatorMovements.coinciden(
+                    rows_report, movements, coincidencias, masivo
+                )
+                ##values = coincidencias[-1]
 
         return {
             "coincidencias": coincidencias,

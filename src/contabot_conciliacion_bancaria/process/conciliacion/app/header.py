@@ -15,7 +15,7 @@ class HeaderReport(StrEnum):
     NUM_DOC = "NUM. DOC."
     RUC = "RUC"
     NOMBRE_RAZON_SOCIAL = "NOMBRE O RAZÓN SOCIAL"
-    GLOSA = "GLOSA "
+    GLOSA = "GLOSA"
     MONEDA = "MON"
     TOTAL = "TOTAL"
     BANCO = "BANCO"

@@ -41,6 +41,10 @@ class GetReport:
             resultado["movimientos"] = movement
             masivo.extend(resultado["masivo"])
             excel_builder.make_report(sheet_name, resultado)
+            # Eliminar de mayor a menor
+            for i in sorted(resultado["coincidencias"], reverse=True):
+                del movement[i - 2]
+            masivo.extend(movement)
 
 
 class MasivoByBank:

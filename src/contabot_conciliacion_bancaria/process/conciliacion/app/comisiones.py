@@ -1,21 +1,20 @@
 class Comision:
-    def __init__(self):
-        self.COMISION_25 = 25
-        self.COMISION_20 = 20
-        self.COMISION_5 = 5
-        self.SIN_COMISION = 0
+    @staticmethod
+    def con_25(monto_reporte: float) -> float:
+        return monto_reporte + 25
 
-    def con_25(self, monto_reporte: float) -> float:
-        return monto_reporte + self.COMISION_25
+    @staticmethod
+    def con_20(monto_reporte: float) -> float:
+        return monto_reporte + 20
 
-    def con_20(self, monto_reporte: float) -> float:
-        return monto_reporte + self.COMISION_20
+    @staticmethod
+    def con_5(monto_reporte: float) -> float:
+        return monto_reporte + 5
 
-    def con_5(self, monto_reporte: float) -> float:
-        return monto_reporte + self.COMISION_5
+    @staticmethod
+    def con_1_71(monto_reporte: float) -> float:
+        return monto_reporte + 1.71
 
-    def sin_comision(self, monto_reporte: float) -> float:
-        return monto_reporte + self.SIN_COMISION
-
-    def calcular(self, monto_reporte: float, valor_comision: int) -> float:
+    @staticmethod
+    def calcular(monto_reporte: float, valor_comision: int) -> float:
         return monto_reporte + valor_comision

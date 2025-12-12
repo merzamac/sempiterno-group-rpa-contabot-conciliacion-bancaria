@@ -78,8 +78,10 @@ SHEET_DOLARES: dict = {
 
 class GetFormatedEgresosMovement:
     @classmethod
-    def execute(cls, excel_path: Path) -> tuple:
-        movimientos_soles: dict = {}
+    def execute(
+        cls, excel_path: Path
+    ) -> tuple[dict[str, list[RowMovement]], dict[str, list[RowMovement]]]:
+        movimientos_soles: dict[str, list[RowMovement]] = {}
         excel_reader = ExcelDocumentReader(file_path=excel_path)
         sheets_egresos_soles = tuple(excel_reader.search_sheet_names("EGR     SOL"))
         sheets_egresos_dolares = tuple(excel_reader.search_sheet_names("EGR     DOL"))
@@ -97,16 +99,16 @@ class GetFormatedEgresosMovement:
                 )
             )
             rows_movements = tuple(movimientos_soles_by_bank.to_dicts())
-            rows_by_bank = []
+            rows_by_bank: list[RowMovement] = []
             for row_movement in rows_movements:
                 row = cls._parse_movement_transaction(
                     row_movement, Moneda.PEN.value, bank, header
                 )
                 rows_by_bank.append(row)
 
-            movimientos_soles[sheet_name] = tuple(rows_by_bank)
+            movimientos_soles[sheet_name] = rows_by_bank
 
-        movimientos_dolares: dict = {}
+        movimientos_dolares: dict[str, list[RowMovement]] = {}
         for sheet_name in sheets_egresos_dolares:
             bank = Bank[sheet_name.split(" ")[1]].value
             schema = get_schema_egresos(bank)
@@ -128,7 +130,7 @@ class GetFormatedEgresosMovement:
                 )
                 rows_by_bank.append(row)
 
-            movimientos_dolares[sheet_name] = tuple(rows_by_bank)
+            movimientos_dolares[sheet_name] = rows_by_bank
         return movimientos_soles, movimientos_dolares
 
     @classmethod
