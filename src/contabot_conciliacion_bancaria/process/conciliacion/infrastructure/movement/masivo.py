@@ -19,7 +19,7 @@ class Masivo:
         self.usd = tuple(r for r in masivo if r.tipo_moneda == Moneda.USD.value)
         self.pen = tuple(r for r in masivo if r.tipo_moneda == Moneda.PEN.value)
 
-    def generic_data(self, moneda: str) -> dict:
+    def generic_data(self, moneda: str, date: date) -> dict:
         today = date.today()
         anio = str(today.year)
         mes = str(today.month).zfill(2)
@@ -35,25 +35,27 @@ class Masivo:
             "valor_me": "0",
         }
 
-    def soles_by_bank(self) -> dict:
+    def soles_by_bank(self, date: date) -> dict:
         moneda = "N"
         return self._by_bank(
             reports=self.pen,
-            generic_data=self.generic_data(moneda),
+            generic_data=self.generic_data(moneda, date),
         )
 
-    def ingresos_pen_by_bank(self) -> dict:
+    def ingresos_pen_by_bank(self, date: date) -> dict:
         # values = tuple(r for r in self.pen if r.tipo_transaccion == "")
         # con la linea comentada puedes ver cueantas movimientos llegan con tipo de transaccion vacio
         # citiban no se considera para los ingresos
         return self._by_bank_and_payment(
             reports=self.pen,
-            generic_data=self.generic_data(Moneda.PEN.type()),
+            generic_data=self.generic_data(Moneda.PEN.type(), date),
         )
 
-    def dolares_by_bank(self) -> dict:
-        moneda = "E"
-        return self._by_bank(self.usd, generic_data=self.generic_data(moneda))
+    def dolares_by_bank(self, date: date) -> dict:
+
+        return self._by_bank(
+            self.usd, generic_data=self.generic_data(Moneda.USD.type(), date)
+        )
 
     def _by_bank(self, reports: tuple, generic_data: dict) -> dict:
         by_bank: dict = {}

@@ -10,6 +10,8 @@ from contabot_conciliacion_bancaria.process.conciliacion.app.factory import (
 )
 from contabot_conciliacion_bancaria.process.conciliacion.app.header import HeaderMasivo
 
+from contabot_conciliacion_bancaria.process.shared.domain.models import RowMasivo
+
 
 class ExcelBuilder(ABC):
     def __init__(self):
@@ -143,7 +145,7 @@ class ExcelOpenpyxl:
     def build(self) -> Workbook:
         return self.wb
 
-    def create_sheet(self, name_sheet: str) -> Worksheet:
+    def create_sheet(self, name_sheet: str | None) -> Worksheet:
         return self.wb.create_sheet(title=name_sheet)
 
     def add_header(
@@ -215,7 +217,7 @@ class MasivoExcelBuilder(ExcelOpenpyxl):
     def __init__(self):
         super().__init__()
 
-    def make_report(self, name_sheet: str, data: list):
+    def make_report(self, data: list, name_sheet: str | None = "Hoja1"):
         ws = self.create_sheet(name_sheet)
         # Configurar header
         self.add_header(ws, HeaderMasivo.values(), "cc1758")

@@ -15,6 +15,8 @@ from contabot_conciliacion_bancaria import paths
 from contabot_conciliacion_bancaria.utils.manager import CredentialManager
 from keyring.credentials import Credential
 from time import sleep
+from datetime import date, timedelta
+from contabot_conciliacion_bancaria.notification.models import Notification
 
 
 class ConciliacionProcessor(AppBasedProcessor):
@@ -26,23 +28,39 @@ class ConciliacionProcessor(AppBasedProcessor):
     ) -> None:
         container = self.get_container(processable_directory.element_path)
         container.conciliar()
-        container.masivo(period_date=processable_directory.get_period_date)
+        period_date = self.get_date(processable_directory.get_period_date)
+        container.masivo(period_date=period_date)
         files_to_upload: tuple[FileToUpload, ...] = container.save(save_directory)
-        self.process_with_app(files_to_upload)
 
-    def process_with_app(self, file_to_upload: tuple[FileToUpload, ...]) -> None:
+        self.process_with_app(files_to_upload, date=period_date)
+
+    def get_date(self, date: date) -> date:
+        # date end, previous month
+
+        return date.replace(day=1) - timedelta(days=1)
+
+    def process_with_app(
+        self, file_to_upload: tuple[FileToUpload, ...], date: date
+    ) -> None:
         credentials: Credential = CredentialManager.get_credential(
             service_name="Aconsys"
         )
+
         with AconsysApp(paths.APP_PATH, credentials) as app:
             # app.change_work_period()
-            app.change_work_period()
+            app.change_work_period(date)
             accounting_window = app.accounting_entry_process_from_excel()
             for file in file_to_upload:
-
+                notification: Notification = Notification()
                 accounting_window.set_date_and_type_operation(
-                    file.date, file.type_transaction
+                    file.date.replace(month=12), file.type_transaction
                 )
                 accounting_window.set_file_path(file.file_path)
-                sleep(10)
-                # accounting_window.get_validation()
+                validation_message = accounting_window.get_validation()
+
+                if not validation_message:
+                    accounting_window.get_process_result()
+
+                notification.add_warning(validation_message)
+
+                notification.create_file(file.file_path)

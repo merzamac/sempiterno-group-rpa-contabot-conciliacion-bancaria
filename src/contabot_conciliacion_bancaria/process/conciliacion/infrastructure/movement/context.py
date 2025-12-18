@@ -57,7 +57,7 @@ class MasivoByBank:
                 continue
             masivo_excel = MasivoExcelBuilder()
             file = f"EGR {sheet_name}"
-            masivo_excel.make_report(sheet_name, data)
+            masivo_excel.make_report(data, sheet_name)
             wb = masivo_excel.build()
             children.append(
                 Child(
@@ -97,7 +97,7 @@ class MasivoIngresosByBank:
                 row_copy.cta_contable = (
                     "1031103" if "EFECTIVO" in sheet_name else "1031102"
                 )
-                masivo_excel.make_report(Moneda.PEN.value, (chuck_data + [row_copy]))
+                masivo_excel.make_report(data=(chuck_data + [row_copy]))
                 wb = masivo_excel.build()
                 children.append(
                     Child(
@@ -148,7 +148,9 @@ class MasivoByDate:
                     continue
                 masivo_excel = MasivoExcelBuilder()
                 file = f"{first_date.strftime('%d.%m')}"
-                masivo_excel.make_report(sheet_name, data_by_date)
+                masivo_excel.make_report(
+                    data=data_by_date,
+                )
                 wb = masivo_excel.build()
                 currency = "PEN" if "SOLES" in str(save_dir) else "USD"
                 transaction_type = f"EGR {currency} {sheet_name}"
