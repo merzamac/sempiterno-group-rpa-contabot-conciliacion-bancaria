@@ -36,8 +36,8 @@ class EgresosStrategy(MovimientoStrategy):
         masivo: list[RowMovement] = []
         for glosa_data in data_to_conciliar.glosas:
             # for index, row in enumerate(movement, 2):
-            if glosa_data.glosa == "PROV EXT SOFTPLAN":
-                print(glosa_data.glosa)  # and fecha_emision == row.fecha_emision:
+            # if glosa_data.glosa == "PROV EXT SOFTPLAN":
+            #     print(glosa_data.glosa)  # and fecha_emision == row.fecha_emision:
             rows_report, marcar_glosa_con_fecha = (
                 ReporteComparator.encontrar_coincidencias(
                     glosa_data, data_to_conciliar.report

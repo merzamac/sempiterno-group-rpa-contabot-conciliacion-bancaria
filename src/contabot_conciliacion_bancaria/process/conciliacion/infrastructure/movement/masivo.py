@@ -19,14 +19,13 @@ class Masivo:
         self.usd = tuple(r for r in masivo if r.tipo_moneda == Moneda.USD.value)
         self.pen = tuple(r for r in masivo if r.tipo_moneda == Moneda.PEN.value)
 
-    def generic_data(self, moneda: str, date: date) -> dict:
-        today = date.today()
-        anio = str(today.year)
-        mes = str(today.month).zfill(2)
+    def generic_data(self, moneda: str, date_: date) -> dict:
+        anio = str(date_.year)
+        mes = str(date_.month).zfill(2)
         return {
             "anio": anio,
             "mes": mes,
-            "item": "001",
+            "NUM_COMPBTE": "001",
             "cen_costo": "",
             "cod_dcto": "00",
             "cod_cliente": "",
@@ -35,11 +34,27 @@ class Masivo:
             "valor_me": "0",
         }
 
+    def generic_data_ingresos(self, moneda: str, date_: date) -> dict:
+
+        anio = str(date_.year)
+        mes = str(date_.month).zfill(2)
+        return {
+            "anio": anio,
+            "mes": mes,
+            "NUM_COMPBTE": "01",
+            "cen_costo": "",
+            "cod_dcto": "00",
+            "cod_cliente": "",
+            "mon": moneda,
+            "tip_mvto": "C",
+            "valor_me": "0",
+        }
+
     def soles_by_bank(self, date: date) -> dict:
         moneda = "N"
         return self._by_bank(
             reports=self.pen,
-            generic_data=self.generic_data(moneda, date),
+            generic_data=self.generic_data(Moneda.PEN.type(), date),
         )
 
     def ingresos_pen_by_bank(self, date: date) -> dict:
@@ -48,7 +63,7 @@ class Masivo:
         # citiban no se considera para los ingresos
         return self._by_bank_and_payment(
             reports=self.pen,
-            generic_data=self.generic_data(Moneda.PEN.type(), date),
+            generic_data=self.generic_data_ingresos(Moneda.PEN.type(), date),
         )
 
     def dolares_by_bank(self, date: date) -> dict:
@@ -62,7 +77,7 @@ class Masivo:
         for bank in Bank:
             bank_reports = [report for report in reports if report.banco == bank.value]
             by_bank[bank.value] = tuple(
-                self._parse_masivo(generic_data, index, report)
+                self._parse_masivo_egresos(generic_data, index, report)
                 for index, report in enumerate(bank_reports, 1)
             )
         return by_bank
@@ -87,8 +102,8 @@ class Masivo:
                     if report.tipo_transaccion.endswith(payment.value)
                 ]
                 by_bank_and_payment[f"{payment.value} {bank.value}"] = tuple(
-                    self._parse_masivo(generic_data, index, report)
-                    for index, report in enumerate(bank_reports_by_payment, 1)
+                    self._parse_masivo(generic_data, item, report)
+                    for item, report in enumerate(bank_reports_by_payment, 1)
                 )
         return by_bank_and_payment
 
@@ -102,24 +117,23 @@ class Masivo:
     # }
 
     @classmethod
-    def _parse_masivo(self, data: dict, index_: int, report) -> RowMasivo:
-        index = str(index_).zfill(2)
+    def _parse_masivo(self, data: dict, item_: int, report) -> RowMasivo:
+        item: str = str(item_).zfill(3)
         # 104132 ibk
         # 104114 sbk
         # 104141 bbva
         # 104121 bcp
-        cta_contable = {
-            "IBK": "104132",
-            "SBK": "104114",
-            "BBVA": "104141",
-            "BCP": "104121",
-        }
-
+        valor_me: float = 00
+        valor_mn: float = 00
+        if data["mon"] == Moneda.USD.type():
+            valor_me = abs(report.monto)
+        else:
+            valor_mn = abs(report.monto)
         return RowMasivo(
             anio=data["anio"],
             mes=data["mes"],
-            num_compbte=index,
-            items=data["item"],
+            num_compbte=data["NUM_COMPBTE"],
+            items=item,
             cen_costo=data["cen_costo"],
             cta_contable=str(
                 CuentaContable().cuenta(report.banco, Moneda[report.tipo_moneda])
@@ -132,8 +146,42 @@ class Masivo:
             glosa=report.glosa,
             mon=data["mon"],
             tip_mvto=data["tip_mvto"],
-            valor_mn=abs(report.monto),
-            valor_me=data["valor_me"],
+            valor_mn=valor_mn,
+            valor_me=valor_me,
+        )
+
+    @classmethod
+    def _parse_masivo_egresos(self, data: dict, item_: int, report) -> RowMasivo:
+        item: str = str(item_).zfill(2)
+        # 104132 ibk
+        # 104114 sbk
+        # 104141 bbva
+        # 104121 bcp
+        valor_me: float = 00
+        valor_mn: float = 00
+        if data["mon"] == Moneda.USD.type():
+            valor_me = abs(report.monto)
+        else:
+            valor_mn = abs(report.monto)
+        return RowMasivo(
+            anio=data["anio"],
+            mes=data["mes"],
+            num_compbte=item,
+            items=data["NUM_COMPBTE"],
+            cen_costo=data["cen_costo"],
+            cta_contable=str(
+                CuentaContable().cuenta(report.banco, Moneda[report.tipo_moneda])
+            ),
+            cod_dcto=data["cod_dcto"],
+            num_dcto=report.referencia,
+            cod_cliente=data["cod_cliente"],
+            fch_dcto=report.fecha_pagos,
+            fch_vto=report.fecha_pagos,
+            glosa=report.glosa,
+            mon=data["mon"],
+            tip_mvto=data["tip_mvto"],
+            valor_mn=valor_mn,
+            valor_me=valor_me,
         )
 
 

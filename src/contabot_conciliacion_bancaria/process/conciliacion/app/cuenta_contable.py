@@ -10,9 +10,10 @@ class Bank(StrEnum):
 
 
 class PaymentGateway(StrEnum):
+    EFECTIVO = "EFECTIVO"
     AMERICAN_EXPRESS = "AMEX"
     MASTERCARD = "MC"
-    EFECTIVO = "EFECTIVO"
+
     # OTROS = "OTROS"
 
     @classmethod

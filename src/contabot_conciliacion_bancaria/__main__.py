@@ -24,7 +24,6 @@ def main() -> None:
 
     if not processable_input_files:
         logger.warning("No files to process.")
-
         return
     for processable_file in processable_input_files:
         with logger.contextualize(

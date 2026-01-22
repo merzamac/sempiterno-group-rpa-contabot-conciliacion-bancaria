@@ -1,3 +1,4 @@
+from contabot_conciliacion_bancaria.process.shared.domain.models import RowMasivo
 from contabot_conciliacion_bancaria.types import TransactionType
 from contabot_conciliacion_bancaria.process.conciliacion.app.cuenta_contable import (
     Bank,
@@ -78,39 +79,54 @@ class MasivoIngresosByBank:
     def execute(masivo_data: dict, children: list, period_date: date):
         # save_dir.mkdir(parents=True, exist_ok=True)
 
-        for sheet_name, data in masivo_data.items():
-            """Dividir los movimientos en grupos, grupos por bancos. hay 4"""
-            if not data:
-                continue
+        for type_bank in Bank:
+            ingresos_data: dict = {}
+            ingresos_data = {
+                sheet_name: data
+                for sheet_name, data in masivo_data.items()
+                if type_bank in sheet_name
+            }
+            num_compbte = 1
+            for sheet_name, data in ingresos_data.items():
+                """Dividir los movimientos en grupos, grupos por bancos. hay 4"""
+                if not data:
+                    continue
 
-            for i, chuck_data in enumerate(split_operation(data, MAX_ROWS), 1):
-                """de cada banco se genera un masivo, pero tiene un limites de registros y debe ser de menos de 1000"""
-                bank = Bank[sheet_name.split(" ")[1]].value
-                masivo_excel = MasivoExcelBuilder()
-                transaction_type = f"ING PEN {bank}"
-                file = f"ING {sheet_name} {i if len(chuck_data) > 990 else ''}"
-                total = round(sum([row.valor_mn for row in chuck_data]), 2)
-                row_copy = copy.deepcopy(chuck_data[-1])
+                for i, chuck_data in enumerate(split_operation(data, MAX_ROWS), 1):
+                    """de cada banco se genera un masivo, pero tiene un limites de registros y debe ser de menos de 1000"""
 
-                row_copy.valor_mn = total
-                row_copy.num_compbte = str(int(row_copy.num_compbte) + 1)
-                row_copy.cta_contable = (
-                    "1031103" if "EFECTIVO" in sheet_name else "1031102"
-                )
-                masivo_excel.make_report(data=(chuck_data + [row_copy]))
-                wb = masivo_excel.build()
-                children.append(
-                    Child(
-                        name=Path(MASIVOS_INGRESOS_DIR / bank / file),
-                        wb=wb,
-                        suffix=SuffixTypes.XLSX,
-                        to_upload=True,
-                        transaction_type=TransactionType[
-                            transaction_type.replace(" ", "_")
-                        ].value,
-                        _date=period_date,
+                    bank = Bank[sheet_name.split(" ")[1]].value
+                    masivo_excel = MasivoExcelBuilder()
+                    transaction_type = f"ING PEN {bank}"
+                    file = f"ING {sheet_name} {i if len(data) > 990 else ''}"
+                    for j, row_data in enumerate(chuck_data, 1):
+                        row_data.items = str(j).zfill(3)
+                        row_data.num_compbte = str(num_compbte).zfill(2)
+                    total = round(sum([row.valor_mn for row in chuck_data]), 2)
+                    row_copy = copy.deepcopy(chuck_data[-1])
+
+                    row_copy.valor_mn = total
+                    row_copy.items = str(int(row_copy.items) + 1)
+                    row_copy.cta_contable = (
+                        "1031103" if "EFECTIVO" in sheet_name else "1031102"
                     )
-                )
+                    row_copy.num_dcto = sheet_name
+                    row_copy.tip_mvto = "A"
+                    masivo_excel.make_report(data=(chuck_data + [row_copy]))
+                    wb = masivo_excel.build()
+                    children.append(
+                        Child(
+                            name=Path(MASIVOS_INGRESOS_DIR / bank / file),
+                            wb=wb,
+                            suffix=SuffixTypes.XLSX,
+                            to_upload=True,
+                            transaction_type=TransactionType[
+                                transaction_type.replace(" ", "_")
+                            ].value,
+                            _date=period_date,
+                        )
+                    )
+                    num_compbte += 1
 
 
 class DuplicateMasivo:

@@ -12,10 +12,10 @@ requires_python = ">=3.13"
 
 [[package]]
 name = "aconsys"
-version = "0.4.0"
+version = "0.4.9"
 requires_python = ">=3.12"
 git = "https://github.com/merzamac/pyaconsys.git"
-revision = "5987963cf8d474f6e23d519bd0cde0bf4f63999f"
+revision = "9e6eed73761c577454c2cb0a497643f05cc9cc09"
 summary = "A Python wrapper for the Aconsys desktop application."
 groups = ["default"]
 dependencies = [

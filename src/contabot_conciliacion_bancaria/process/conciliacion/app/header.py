@@ -127,7 +127,7 @@ class HeaderMasivo(Header):
 
     ANIO = "AÑO"
     MES = "MES"
-    REGISTRO = "REGISTRO"
+    REGISTRO = "NUM_COMPBTE"
     ITEMS = "ITEMS"
     CEN_COSTO = "CEN_COSTO"
     CTA_CONTABLE = "CTA_CONTABLE"
