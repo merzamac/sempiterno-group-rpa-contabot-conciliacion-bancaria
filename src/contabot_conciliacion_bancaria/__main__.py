@@ -36,7 +36,6 @@ def main() -> None:
                 / processable_file.month
                 / processable_file.day
                 / processable_file.process_type
-                # processable_file.element_path.stem
             )
 
             # By default, the bodies of untyped functions are not checked, consider using --check-untyped-defsMypy(annotation-unchecked)

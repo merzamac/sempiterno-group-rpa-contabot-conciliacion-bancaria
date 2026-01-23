@@ -37,6 +37,7 @@ class ConciliacionProcessor(AppBasedProcessor):
         self.process_with_app(
             files_to_upload, date_=period_date, save_directory=save_directory
         )
+        logger.info(f"Terminado")
 
     def get_date(self, date: date) -> date:
         # date end, previous month
@@ -59,8 +60,10 @@ class ConciliacionProcessor(AppBasedProcessor):
             logger.info(f"Work period {date_}")
             accounting_window = app.accounting_entry_process_from_excel()
             notification: Notification = Notification()
-            for file in file_to_upload:
-
+            n_files = len(file_to_upload)
+            for i, file in enumerate(file_to_upload, 1):
+                # break
+                logger.info(f"***Archivo: {i} de {n_files}***")
                 accounting_window.set_date_and_type_operation(
                     file.date, file.type_transaction
                 )
@@ -69,7 +72,7 @@ class ConciliacionProcessor(AppBasedProcessor):
                     f"Date: {file.date}, Type of Operation: {file.type_transaction}, file: {file.file_path}"
                 )
                 validation_message = accounting_window.get_validation()
-                logger.info(f"Validation result '{validation_message}'")
+                logger.info(f"Validation result: '{validation_message}'")
                 if "Inconsistencia" in validation_message:
                     result = accounting_window.get_process_result()
                     continue
