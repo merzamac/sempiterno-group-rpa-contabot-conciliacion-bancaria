@@ -3,6 +3,7 @@ import fastexcel
 from polars import DataFrame, read_excel
 import difflib
 from contabot_conciliacion_bancaria.process.commands import ReadExcelCommand
+from contabot_conciliacion_bancaria.process.constants import EMPTY_ROW_IDICATOR
 
 
 class ExcelDocumentReader:
@@ -40,11 +41,10 @@ class ExcelDocumentReader:
             read_options=command.read_options,
             drop_empty_rows=False,
             # schema_overrides=Command.schema_overrides,
-        )
+        ).select(command.header_col)
         return (
             df.head(ExcelDocumentReader.rows(df))
             .cast(command.schema_overrides)
-            .select(command.header_col)
             .with_columns(command.expr)
         )
 
@@ -64,12 +64,15 @@ class ExcelDocumentReader:
         consecutive_empty_rows = 0
         cut_off_index = len(df)
         for i, row in enumerate(df.iter_rows()):
-            row_empty = all(value is None or str(value).strip() == "" for value in row)
+            # row_empty = all(value is None or str(value).strip() == "" for value in row)
+            empty_cells = sum(
+                1 for value in row if value is None or str(value).strip() == ""
+            )
 
-            if row_empty:
+            if empty_cells > EMPTY_ROW_IDICATOR:
                 consecutive_empty_rows += 1
                 if consecutive_empty_rows >= 2:
-                    cut_off_index = i - consecutive_empty_rows + 1
+                    cut_off_index = i - 1
                     break
             else:
                 consecutive_empty_rows = 0

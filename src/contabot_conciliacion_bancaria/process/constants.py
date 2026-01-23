@@ -29,3 +29,6 @@ CUENTA_CONTABLE_PEN = {
     "IBK": 104131,
     "BCP": 104121,
 }
+
+# una fila del dataframe se considera vacia si hay mas de 3 campos vacios
+EMPTY_ROW_IDICATOR = 3
