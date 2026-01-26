@@ -25,13 +25,14 @@ class ProcessableElement(ABC):
 
     def __init__(self, element_path: Path) -> None:
         parents_file: tuple[str, ...] = tuple(element_path.parts[::-1])
-        process_type, day, month, year = parents_file[:4]
+        # process_type, day, month, year = parents_file[:4]
+        day, month, year = parents_file[:3]
 
         self.element_path: Path = element_path
         self.year: str = year
         self.month: str = month
         self.day: str = day
-        self.process_type: str = process_type
+        # self.process_type: str = process_type
 
     @property
     def get_period_date(self) -> date:
@@ -47,9 +48,7 @@ class ProcessableElement(ABC):
         return parse_date.date()
 
     def __hash__(self) -> int:
-        return hash(
-            f"{self.year}_{self.month}_{self.day}_{self.process_type}_{self.element_path.stem}"
-        )
+        return hash(f"{self.year}_{self.month}_{self.day}_{self.element_path.stem}")
 
     def __eq__(self, other: object) -> bool:
 
@@ -59,14 +58,14 @@ class ProcessableElement(ABC):
             and self.year == other.year
             and self.month == other.month
             and self.day == other.day
-            and self.process_type == other.process_type
+            # and self.process_type == other.process_type
         )
 
     def __repr__(self) -> str:
         return (
             f"{self.__class__.__name__}(element_path={self.element_path}, "
             f"year={self.year}, month={self.month}, day={self.day}, "
-            f"payment_gateway={self.process_type})"
+            # f"payment_gateway={self.process_type})"
         )
 
 
@@ -79,9 +78,7 @@ class ProcessableFile(ProcessableElement):
     def __init__(self, element_path: Path) -> None:
         super().__init__(element_path)
         self.suffix: SuffixTypes = SuffixTypes(element_path.suffix.lower())
-        self.relative_save_dir: Path = Path(
-            f"{self.year}/{self.month}/{self.day}/{self.process_type}"
-        )
+        self.relative_save_dir: Path = Path(f"{self.year}/{self.month}/{self.day}")
 
 
 class ProcessableDirectory(ProcessableElement):

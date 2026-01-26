@@ -1,8 +1,5 @@
-from typing import Optional
 from pathlib import Path
-from contabot_conciliacion_bancaria.path_reader.domain.models import (
-    ProcessableDirectory,
-)
+
 from loguru import logger
 from datetime import datetime
 from contabot_conciliacion_bancaria import paths
@@ -10,8 +7,9 @@ from contabot_conciliacion_bancaria.processor.strategy import ProcessProcessor
 from contabot_conciliacion_bancaria.path_reader.infrastructure.get_files_input_to_process import (
     GetInputFilesToProcess,
 )
-from contabot_conciliacion_bancaria.processor.factory import (
-    ProcessProcessorFactory,
+
+from contabot_conciliacion_bancaria.processor.concrete_strategies import (
+    ConciliacionProcessor,
 )
 
 
@@ -35,7 +33,6 @@ def main() -> None:
                 / processable_file.year
                 / processable_file.month
                 / processable_file.day
-                / processable_file.process_type
             )
 
             # By default, the bodies of untyped functions are not checked, consider using --check-untyped-defsMypy(annotation-unchecked)
@@ -43,14 +40,7 @@ def main() -> None:
             save_directory.mkdir(parents=True, exist_ok=True)
             # se crea el proceso...
             logger.info("file process...")
-            processor: Optional[ProcessProcessor] = (
-                ProcessProcessorFactory.create_processor(processable_file.process_type)
-            )
-            # By default, the bodies of untyped functions are not checked, consider using --check-untyped-defsMypy(annotation-unchecked)
-
-            if not processor:
-                logger.error("Invalid process")
-                return
+            processor: ConciliacionProcessor = ConciliacionProcessor()
 
             # Ejecutar procesamiento específico
             processor.process(processable_file, save_directory)

@@ -45,7 +45,10 @@ class GetReport:
             # Eliminar de mayor a menor
             for i in sorted(resultado["coincidencias"], reverse=True):
                 del movement[i - 2]
-            masivo.extend(movement)
+            for row in movement:
+                if row.glosa == "NONE":
+                    row.glosa = f"PG {row.pagos or row.descripcion or "DESCONOCIDO"}"
+            masivo.extend(row for row in movement)
 
 
 class MasivoByBank:

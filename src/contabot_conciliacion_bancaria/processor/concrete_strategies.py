@@ -19,7 +19,7 @@ from datetime import date, timedelta
 from contabot_conciliacion_bancaria.notification.models import Notification
 
 
-class ConciliacionProcessor(AppBasedProcessor):
+class ConciliacionProcessor:
     def get_container(self, element_path: Path) -> Container:
         return ConciliacionContainer(element_path)
 

@@ -23,7 +23,7 @@ class ReadInputDir:
         directories_input: tuple[Path, ...] = (
             *ReadDir.execute(
                 input_dir,
-                f"*/{ProcessTypes.CONCILIACION.value}/*{SuffixTypes.XLSX.value}",
+                f"*{SuffixTypes.XLSX.value}",
             ),
         )
 
@@ -43,7 +43,7 @@ class ReadOutputDir:
     @staticmethod
     def execute(output_dir: Path) -> tuple[ProcessableDirectory, ...]:
         directories_output: tuple[Path, ...] = (
-            *ReadDir.execute(output_dir, f"*/{ProcessTypes.CONCILIACION.value}/*"),
+            *ReadDir.execute(output_dir, f"Movimientos.xlsx"),
         )
         return tuple(
             processable_directory

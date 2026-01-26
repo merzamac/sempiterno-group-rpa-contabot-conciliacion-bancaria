@@ -40,20 +40,20 @@ class ProcessableElementFactory:
     def __has_valid_parents(cls, file_path: Path) -> bool:
         parents_file: tuple[str, ...] = tuple(file_path.parts[::-1])
 
-        has_enough_parts: bool = len(parents_file) >= 4
+        has_enough_parts: bool = len(parents_file) == 5
 
         if not has_enough_parts:
             return False
 
-        has_a_valid_process: bool = (
-            parents_file[0].strip().upper() in cls.supported_process
-        )
-        has_a_valid_day_dir: bool = len(parents_file[1].strip()) == 2
-        has_a_valid_month_dir: bool = len(parents_file[2].strip()) >= 5
-        has_a_valid_year_dir: bool = len(parents_file[3].strip()) == 4
+        # has_a_valid_process: bool = (
+        #     parents_file[0].strip().upper() in cls.supported_process
+        # )
+        has_a_valid_day_dir: bool = len(parents_file[0].strip()) == 2
+        has_a_valid_month_dir: bool = len(parents_file[1].strip()) >= 5
+        has_a_valid_year_dir: bool = len(parents_file[2].strip()) == 4
         return (
-            has_a_valid_process
-            and has_a_valid_day_dir
+            # has_a_valid_process
+            has_a_valid_day_dir
             and has_a_valid_month_dir
             and has_a_valid_year_dir
         )

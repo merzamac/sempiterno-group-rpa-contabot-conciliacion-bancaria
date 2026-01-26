@@ -141,15 +141,15 @@ class GetFormatedEgresosMovement:
         return RowMovement(
             fecha_pagos=emision.date() if emision else date.min,
             referencia=str(row.get(header.REFERENCIA, "")).strip().replace(" ", ""),
-            descripcion=str(row.get(header.DESCRIPCION, "")).strip(),
+            descripcion=str(row.get(header.DESCRIPCION, "")).strip().upper(),
             # movimiento=str(row.get(header.MOVIMIENTO, "")),
             tipo_transaccion="",
             monto=float(row.get(header.MONTO, 0.0)),
             estado=str(row.get(header.ESTADO, "")).strip(),
             tipo_moneda=str(moneda.upper()).strip(),
-            glosa=str(row.get(header.GLOSA, "")).strip(),
+            glosa=str(row.get(header.GLOSA, "")).strip().upper(),
             banco=str(bank.strip().upper()).strip(),
-            pagos=str(row.get(header.DESCRIPCION, "")).strip(),
+            pagos=str(row.get(header.DESCRIPCION, "")).strip().upper(),
         )
 
 
@@ -368,10 +368,12 @@ class GetFormatedToConciliar:
 class ExtractConciliacionFiles:
     @staticmethod
     def execute(excel_files: dict[str, Path]) -> ConciliacionFiles:
-        return {
+        files_dict = {
             ExtractConciliacionFiles.get_normalized_key(name_file): file_path
             for name_file, file_path in excel_files.items()
-        }  # type: ignore
+        }
+        # type: ignore
+        return ConciliacionFiles(files_dict)
 
     @staticmethod
     def get_normalized_key(key: str) -> str:
